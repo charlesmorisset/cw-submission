@@ -144,8 +144,10 @@
             const data = rows.map(row => {
                 const textValue = row.querySelector('input').value;
                 const textareaValue = row.querySelector('textarea').value;
-                return { text: textValue, textarea: textareaValue };
+                return { flag: textValue, description: textareaValue };
             });
+            data["cisUsername"] = document.getElementById('cisUsername').value;
+            data["globalTextarea"] = document.getElementById('globalTextarea').value;
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
