@@ -146,13 +146,15 @@
                 const textareaValue = row.querySelector('textarea').value;
                 return { flag: textValue, description: textareaValue };
             });
-            data["cisUsername"] = document.getElementById('cisUsername').value;
-            data["globalTextarea"] = document.getElementById('globalTextarea').value;
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            output = {}
+            output["cisUsername"] = document.getElementById('cisUsername').value;
+            output["globalTextarea"] = document.getElementById('globalTextarea').value;
+            output["flags"] = data;
+            const blob = new Blob([JSON.stringify(output, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `submission_COMP2211_${data["cisUsername"]}.txt`;
+            a.download = `submission_COMP2211_${output["cisUsername"]}.txt`;
             a.click();
             URL.revokeObjectURL(url);
         });
