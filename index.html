@@ -29,7 +29,6 @@
         }
         textarea {
             width: 100%;
-            resize: none;
             border: 1px solid #ccc;
             border-radius: 4px;
             padding: 5px;
@@ -67,7 +66,7 @@
     <button id="downloadJsonButton">Download JSON</button>
     <input type="file" id="uploadJsonInput" accept="application/json" style="display: none;">
     <button id="uploadJsonButton">Upload JSON</button>
-    <button id="validateHashesButton">Validate Hashes</button>
+    <button id="validateHashesButton">Validate Flags</button>
     <table id="editableTable">
         <thead>
             <tr>
@@ -116,6 +115,7 @@
             const textarea = document.createElement('textarea');
             textarea.maxLength = 200;
             textarea.value = textareaValue;
+            textarea.style.width="90%";
             textarea.addEventListener('input', () => updateCharacterCount(row));
             textareaCell.appendChild(textarea);
 
@@ -150,7 +150,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'table-data.json';
+            a.download = `submission_COMP2211_${data["cisUsername"]}.txt`;
             a.click();
             URL.revokeObjectURL(url);
         });
