@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editable Table with JSON Import/Export</title>
+    <title>COMP2211 Submission Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -60,13 +62,18 @@
 </head>
 <body>
     <h1>Coursework submission form preparation</h1>
+    <p> This form helps you prepare the submission file for the COMP2211 Security Coursework. 
+        You can add flags and their explanations, and then download the JSON file to submit. 
+        PLease note this is a static website, and there is no saving mechanism. You can save your
+        progress by downloading the JSON file and uploading it later.
+    </p>
     <input id="cisUsername" placeholder="Enter CIS Username" style="width: 100%; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
     <textarea id="globalTextarea" maxlength="1000" placeholder="Enter up to 1000 characters..." style="width: 100%; height: 100px;"></textarea>
     <button id="addRowButton">Add Row</button>
     <button id="downloadJsonButton">Download JSON</button>
     <input type="file" id="uploadJsonInput" accept="application/json" style="display: none;">
     <button id="uploadJsonButton">Upload JSON</button>
-    <button id="validateHashesButton">Validate Flags</button>
+    <button id="validateHashesButton">Check Flags</button>
     <table id="editableTable">
         <thead>
             <tr>
