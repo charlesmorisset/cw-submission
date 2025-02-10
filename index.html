@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COMP2211 Submission Form</title>
+    <title>COMP2211 Security Submission Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            margin: 100px;
             background-color: #f9f9f9;
         }
+
         h1 {
             text-align: center;
             color: #333;
         }
+
         button {
             margin: 5px;
             padding: 10px 15px;
@@ -26,54 +29,93 @@
             color: white;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         textarea {
             width: 100%;
             border: 1px solid #ccc;
             border-radius: 4px;
             padding: 5px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             background-color: white;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
+
         th {
             background-color: #007BFF;
             color: white;
         }
+
         .charCount {
             text-align: center;
             font-weight: bold;
             color: #555;
         }
+
         .narrow-column {
             width: 20ch;
         }
+
+        #hashValidationResult li {
+            font-style: italic;
+            color: red;
+        }
     </style>
 </head>
+
 <body>
     <h1>Coursework submission form preparation</h1>
-    <p> This form helps you prepare the submission file for the COMP2211 Security Coursework. 
-        You can add flags and their explanations, and then download the JSON file to submit. 
-        PLease note this is a static website, and there is no saving mechanism. You can save your
-        progress by downloading the JSON file and uploading it later.
+    <p> This form helps you prepare the submission file for the COMP2211 Security Coursework. </p>
+    <p>
+        <b>This is a static website, and there is no automatic saving mechanism. </b>
+        You can save your progress by downloading the JSON file and uploading it later.
     </p>
-    <input id="cisUsername" placeholder="Enter CIS Username" style="width: 100%; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-    <textarea id="globalTextarea" maxlength="1000" placeholder="General comments (up to 1000 characters) ..." style="width: 100%; height: 100px;"></textarea>
+    <p> <b>Instructions:</b> 
+        Make sure you have the correct CIS username.
+        The file will be named as <code>submission_COMP2211_[CIS_USERNAME].txt</code>.
+        For each flag you have found in the VM, add a new row, where you can enter the flag and a brief explanation of how you have found the flag. If the flag you have found 
+        has the form <code>flag{XYZ}</code>, you should enter <code>XYZ</code> in the flag column. Your explanation is limited to 300 characters, so be concise. 
+        You explaination should assess how easy or hard it was for you to find this flag (you should write this description as if you were providing feedback to 
+        the relevant employee, and how could the flag be better protected. You will be 
+        assessed both on your ability to demonstrate you have found the flag on your own, following the rules (e.g., without using root privileges) and the quality of your explanation. 
+        Finally, you can add at the end of the form some general comments about your 
+        submission. This section is optional and not marked as such, but can help provide some context for the
+        assessment of specific flags.
+    </p>
+    <p>
+        <b>Validation:</b>
+        The form comes with a validation mechanism, which checks that: 
+        <ul>
+            <li>The CIS username corresponds to a username of a student registerd on the course (stored as a list of MD5 hashes).</li>
+            <li>The flags you have entered are valid (i.e., they are in the list of valid flags, stored as a list of MD5 hashes).</li>
+            <li>There are no duplicate flags in your submission.</li>
+        </ul>
+        The validation will highlight any issues in red. If you see any red, please fix the issues before submitting the form. You can however submit to Ultra a form even 
+        if there are validation errors, in case you believe the validation mechanism is incorrect. If you override the character limits of the form, any additional text will 
+        be ignored when processing. 
+    </p>
+    CIS Username: <input id="cisUsername" placeholder="Enter CIS Username"
+        style="width: 40%; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"><br>
     <button id="addRowButton">Add Row</button>
     <button id="downloadJsonButton">Download JSON</button>
-    <input type="file" id="uploadJsonInput" accept="application/json" style="display: none;">
+    <input type="file" id="uploadJsonInput" accept="application/txt" style="display: none;">
     <button id="uploadJsonButton">Upload JSON</button>
-    <button id="validateHashesButton">Check Flags</button>
+    <button id="validateHashesButton">Validate form</button>
+    <ul id="hashValidationResult"></ul>
     <table id="editableTable">
         <thead>
             <tr>
@@ -86,6 +128,12 @@
         <tbody>
         </tbody>
     </table>
+    <p>In the box below, you can add any information you find relevant to your submission (like specific issues
+        encountered when trying to solve
+        a particular flag). This section is optional and not marked as such, but can help provide some context for the
+        assessment of specific flags. </p>
+    <textarea id="globalTextarea" maxlength="2000" placeholder="General comments (up to 2000 characters) ..."
+        style="width: 100%; height: 100px;"></textarea>
 
     <script>
         const tableBody = document.querySelector('#editableTable tbody');
@@ -95,7 +143,174 @@
         const uploadJsonInput = document.getElementById('uploadJsonInput');
         const validateHashesButton = document.getElementById('validateHashesButton');
 
-        const valid_hashes = []; // Populate this list with valid MD5 hashes
+
+        const valid_hashes = [
+            "098f6bcd4621d373cade4e832627b4f6",
+            "a064c50f3cce143436dea4b7e11d06ed",
+            "c1896ad603fcb588fd3699128529da14",
+            "1d94cad6b55ddccd0c32469ce6a3a94e",
+            "2739a84c9ff6289f7f37368fdb1162f5",
+            "965de2d0a6937763dd8a800f0962acdf",
+            "d8205bf0a7da6e2111f50269cb566f13",
+            "a8144f006b99de9a009f0963ef5e159d",
+            "21f9b9b187b364514a21626d42051c34",
+            "f05a79c1667c7a72aae7e945772d2229",
+            "ac53e8e3afeab4cd769f479beca1f01c",
+            "488f22c28e346da5423c9d8b24a8ed86",
+            "762fb246f036623fe1ec70cde61f0055",
+            "cceee6342e40dfcc74e2992bef5fe4d2",
+            "736a5050f5c5157448ba074246a16ace",
+            "28851fe69d1351d3f9c19b977688a5b1",
+            "455b4b476cabd0ecfb0e987695526ce4",
+            "15fac345aed094e0b6b4473d1712b2ba",
+            "f179cd17abf91bbc70b59aaf01327eec",
+            "be284ce012bb42cc2a49d5dba6773c21",
+            "8153157f43c749ee822bde8a6b5ec9b2",
+            "a3109f4131b07c350737aa80df4c00ce",
+            "55e0acc09bf4e50c401622f33e80b26b",
+            "f37ec366339ca4d76162806a96355f0b",
+            "5ae9e646b8510c7e67bedcb49d926258",
+            "387ed282ac9393ff4ff83775d2617fbb",
+            "098939feed3ba17f87863b86e532e208"
+        ];
+
+        const valid_usernames = [
+            'd7b4b5569a6ab5280ed51a9ac712c50b',
+            'e7184a7cc41e0264aed43c793a04741a',
+            'ed152cc47b006590d7a8bea7943162c3',
+            'dac24e9d3ed333874397c664d204d533',
+            '0985cffe02e227b7d9d9a6c9e566f817',
+            'b2084fb46831e5cb4cc1fe90b2106dce',
+            '26c776c35a7034af6db43d5cb491372c',
+            '21e3ba8c25e9a02a3b8ded3eb49fbfb3',
+            '304e5b5d5a5d586a61c82b6aac43b4bc',
+            '0a9ce09d3366e83ac1a4350f9ec7b9d7',
+            'a1afcaaf8ac1b3b1e54b821bf1c7140b',
+            'cb93e2aca4db5048a60614f944978c9e',
+            'd9d6195ca2445209a044322c88cdcb79',
+            'fa9bb6f33e0143ebc2223ebd0a6f001b',
+            '9202d5a1a8d3d8e5a0f9aa15a15f13a9',
+            'fb5bc2c4ff7b72f6e195d77fbf9a1347',
+            '5d8cceb9da2b28a11c2a37f5b01b57ec',
+            '15647ce2b1c591a626e6083b99252f26',
+            'cf9aa19c7488378f2ac7c05c9df73c19',
+            '37d3ffad880b9df1e1fe64cce6d0f6c4',
+            '3d17bf04ae1a671beaffbce9c45ba9aa',
+            'e03f25b4476cd5c05fe3b45c4b440cdc',
+            '5279d20eb76c9d7c32ea3efd993cc67d',
+            '9c75343b37e9cbab60435808104c0e53',
+            'c520716b7fed1664cf34ae48182d65aa',
+            'f999243659891ef12e28d09c57bf3f06',
+            '564767ed62d6a55e191a608693763c0b',
+            '70e4294ee69319d2215c44cd4d3c09f6',
+            '7cab5bb74c45f9edf4b6021d9b4f183c',
+            'c49655135d16134995db915b32fa4393',
+            'd04f7c3854af238532a5f915c55cfb37',
+            '5fa4a1d013749de7c8a2777010692553',
+            '207a7afcdc61c36ee83f5fcbc43f727c',
+            '4fef9264bfe22a5425c70cd80008c1ac',
+            'f5d21e367f5e75fb929dd0f19181e9a4',
+            '4612e98f8bb965e2d5e83ac7b1c7ebdc',
+            '5eb3b1b4efc911e1beb9ac97c9a94819',
+            'f5f6b2dc8bbe307165f601d9af6b00aa',
+            '0ffc38a3ec13c412294ab05543642a28',
+            '1d84e8b28e15ec79632fccf6da1c1830',
+            'c17f87345307aedc74e617ea894d15a8',
+            '888e16924560acd7130b55888ff767b4',
+            '954de6f960d1f63409948b8948f1178e',
+            '4a4bfe58325e9932e5506e1feace8834',
+            '9155cce28c37039c3e6978335f22df30',
+            'c94256b57f0c80828eb2253cd0a44432',
+            '73dcccd3cd0598c83181766c878777ca',
+            '9fbc48a3d6b5d9c6fc932b8f0bb6c916',
+            'cd0c4302d75c0ebfca28529f504f05e1',
+            'aa715c1c535b7d79f4b65ebb6291a01e',
+            '2f435115af60ee734ecf0d1decc912a0',
+            'eae6a8d448eafd51c498c2064d4df104',
+            '41f20a5fb9233a19fcad87844265cd92',
+            '2a7608bb7bdb13ca5372c0b39e0062a9',
+            'a496768a08ff77a9fe84abd35e06812c',
+            'cfd4cea9c00eb75de8b51d5a193a3df6',
+            '7cafcce36b04f51140de8c3432fe339a',
+            'c63d3c146fb22deafa67bee303f54116',
+            'e6fd4eb1d472fdc5c578d252da3f4092',
+            'bee21274c905ab6af21709d5b5f056b8',
+            '96f6f2e66e47dc8476bfd335b5d9951f',
+            '28643455426f14e04f66417a3b018879',
+            '66ee1eec388b7b69d5eac9caf1c6441c',
+            '95bf6e5f1dd0b2dd6381a67dac9f0d47',
+            'c667c0f9e700430ae39ee48ba3dc79c4',
+            '31251798efdc751e46be69f0e6d72d04',
+            'c67d88b64aba859597213046316c82c1',
+            'f1868ad6daf8f14e9ee0d771016f21c2',
+            '247393dac18041f3ade0753dc0d7933a',
+            '92b923d8a03f2ce055a8740cb317200f',
+            '4aa9c5e886fcf64f93a853c70ab94a8a',
+            '54f161271beeb097ef66e47f836f6218',
+            'bcf963ac00abc4d494fe3076c75d89a7',
+            '5988447faebe63b4aa1563f1f4267c03',
+            'b441126d96b50604a6e269eafb46704f',
+            '3340c4e57a928c58ed7f014f3b3ca5c5',
+            'c7188624f0249f59b7d216b6599dfc92',
+            '9c8981fe9b2e0e12a23853ccb7f33191',
+            'dd0602d739a5921dd0ba8222ef732c3d',
+            '9d5475ccd43b394d0e7b008b4054d003',
+            'a8f7ed3422ed8e1e3b39af5d968148be',
+            'b37338ac898d6b3dceb7f3fc2b4645b3',
+            '3fab32ede33d90497dc0e91a7606be8d',
+            '38e5909b5187afde6901f996844e1464',
+            'ef3778aa2ac7b2abefef44c9381508bf',
+            'c494ff393bede391b26d763a8ecff1c7',
+            'ce3bf182d8df34abb70aca0fe6e386e7',
+            '524ba286131af721e8dc194f8a91fe97',
+            'f39c285ea560dbd3afb9580602194311',
+            '9291ad94d514306ddf522b2a039f0266',
+            'f27359a8612cf13ebd478b84f093d6fa',
+            '5df7adc94d962d776a819a4ffef68ff5',
+            '829d3123992e4062728feb8c3c9a6538',
+            'e42b2a0046a6454168775cdf449a0373',
+            '76b757c2e6cccd78f0df40ee5ebf7edc',
+            '55d02be591a661c7a7e219b5948d1c3f',
+            '9fe3b618c4ed0fceb68d704e9395e33b',
+            '9779d4642e1eb413565656f0324274c7',
+            'c00edc63843356680041a4b9696bc942',
+            '39280b39d3e63ded305ef1924b2e596d',
+            '196a2e0262cadc95f75dccddee5cbc8d',
+            'f0ef8cd900b4eed0a19e06a485b313dd',
+            '570ae06f6f5c6cd12925c81d8522d943',
+            'a70c41d24ea5d4eff7253433cad2bec0',
+            '5906963f268f64bab26e8e5e43be9950',
+            'dadbd59a32a4acfb024c665b5b99cf3e',
+            '4f53a23a6db36cdc248fffb3945a7be3',
+            '257829bf88d4ad3558750ce254af0d31',
+            '8d86b21e4622841d1cf0df51b7d2fa5f',
+            'e2ef7dc43f068e8786f946c764239309',
+            '429adc3274928faadeb90545588274db',
+            'e5b3abd7177d51d6109465d42e1cb7f9',
+            'f83e83911a761919739ed8c35058d73e',
+            '598bcfd99b2193c61878c15f605efc10',
+            '2e5d639d9d47ff21263cf5ca40c21a3b',
+            '2d31ec7eed7b04ca2fa0d9c5d6cd7a5a',
+            '06fb40ed4bf29024cf67e84942d73685',
+            '823b4ca10d86b5ee5d2070b96dcc4c41',
+            '90710c188300e01b4036c63479c9561a',
+            'fabe90f950f1e4a61b7a360240260e9b',
+            'd9078fd53b09e7887655bd2392b8035a',
+            '29d15f98082bd44ab25fd6d0839d32a5',
+            '82d6bb6888b3af55bd1acdd8e9350da7',
+            'cf5369b91e1908c2bab3fad713185268',
+            '550d7b596c58c243280b6039653f229b',
+            '6d1e5a06db6dbc4cc7c7cd7e9ea527ff',
+            '83e05de9d226fc536361db6c7462233f',
+            '2bc46381f80e608420ebf087ea943f75',
+            '122bfe15e2b7fc24fb41d71b6bfc702a',
+            '7146955d87674bf892283f2fdb4d20f1',
+            '98f35481843a18485c55854a65aeb40a',
+            'fa478db636aac8b34961472fe22a8cd9',
+            '0f7eb5e9b8346c2b4bf44e69f7f5117a',
+            'a9dc72c3ca6a286a715cc9b7100fa5b9',
+            '85f6832c109ece4e3899901e67cc1702',
+            '934fc4f4709084af431582920fa8359c']
 
         function md5(value) {
             // Simple MD5 function (use a library like crypto.js for real-world use)
@@ -105,10 +320,11 @@
         function updateCharacterCount(row) {
             const textarea = row.querySelector('textarea');
             const charCountCell = row.querySelector('.charCount');
-            charCountCell.textContent = `${textarea.value.length} / 200`;
+            charCountCell.textContent = `${textarea.value.length} / 300`;
         }
 
         function createRow(textValue = '', textareaValue = '') {
+            console.log(textValue, textareaValue)
             const row = document.createElement('tr');
 
             const textCell = document.createElement('td');
@@ -120,15 +336,15 @@
 
             const textareaCell = document.createElement('td');
             const textarea = document.createElement('textarea');
-            textarea.maxLength = 200;
+            textarea.maxLength = 300;
             textarea.value = textareaValue;
-            textarea.style.width="90%";
+            textarea.style.width = "90%";
             textarea.addEventListener('input', () => updateCharacterCount(row));
             textareaCell.appendChild(textarea);
 
             const charCountCell = document.createElement('td');
             charCountCell.className = 'charCount';
-            charCountCell.textContent = `${textareaValue.length} / 200`;
+            charCountCell.textContent = `${textareaValue.length} / 300`;
 
             const actionsCell = document.createElement('td');
             const deleteButton = document.createElement('button');
@@ -155,7 +371,7 @@
             });
             output = {}
             output["cisUsername"] = document.getElementById('cisUsername').value;
-            output["globalTextarea"] = document.getElementById('globalTextarea').value;
+            output["generalComments"] = document.getElementById('globalTextarea').value;
             output["flags"] = data;
             const blob = new Blob([JSON.stringify(output, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -175,25 +391,63 @@
                 reader.onload = (e) => {
                     const data = JSON.parse(e.target.result);
                     tableBody.innerHTML = '';
-                    data.forEach(row => createRow(row.text, row.textarea));
+                    document.getElementById('cisUsername').value = data["cisUsername"];
+                    document.getElementById('globalTextarea').value = data["generalComments"];
+                    data["flags"].forEach(row => { createRow(row.flag, row.description) });
                 };
                 reader.readAsText(file);
             }
         });
 
         validateHashesButton.addEventListener('click', () => {
+            const errors = []
+            const cisUsername = document.getElementById('cisUsername').value.trim().toLowerCase();
+
+            const hash_username = md5(cisUsername);
+            if (valid_usernames.includes(hash_username)) {
+                document.getElementById('cisUsername').style.backgroundColor = '#d4edda'; // Green for valid
+            } else {
+                document.getElementById('cisUsername').style.backgroundColor = '#f8d7da'; // Red for invalid
+                errors.push('Unknown CIS Username');
+            }
             const rows = Array.from(tableBody.querySelectorAll('tr'));
+            const values = {};
+
             rows.forEach(row => {
-                const textValue = row.querySelector('input').value;
+                const textValue = row.querySelector('input').value.trim().toLowerCase();
+                if (values[textValue]) {
+                    values[textValue].push(row);
+                } else {
+                    values[textValue] = [row];
+                }
                 const hash = md5(textValue);
                 if (valid_hashes.includes(hash)) {
                     row.style.backgroundColor = '#d4edda'; // Green for valid
                 } else {
                     row.style.backgroundColor = '#f8d7da'; // Red for invalid
+                    errors.push('Unknown flag: ' + textValue);
                 }
             });
+
+            Object.values(values).forEach(cells => {
+                if (cells.length > 1) {
+                    errors.push('Duplicate flag submission: ' + cells[0].querySelector('input').value);
+                    console.log(cells);
+                    cells.forEach(row => (row.style.backgroundColor = "#f8d7da"));
+                }
+
+            });
+            const hashValidationResult = document.getElementById('hashValidationResult');
+            hashValidationResult.innerHTML = '';
+            errors.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error;
+                hashValidationResult.appendChild(li);
+            });
+
         });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </body>
+
 </html>
